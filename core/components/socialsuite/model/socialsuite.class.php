@@ -121,6 +121,30 @@ class SocialSuite {
         return $chunk;
     }
 
+    public function simpleCurlRequest($url = '', $post = '') {
+        if (empty($url)) { return array('error' => '[SocialSuite] URL not specified.'); }
+
+        $ch = curl_init();
+        // Set URL to download
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+        if (!empty($post)) {
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
+        }
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        //curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 2);
+        //curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+        $output = curl_exec($ch);
+        curl_close($ch);
+
+        return $output;
+    }
+
+    private function requestUrl($url = '', array $params = array(), $method = 'get') {
+
+    }
 }
 
 ?>
