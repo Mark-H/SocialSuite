@@ -134,8 +134,7 @@ class SocialSuite {
         }
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        //curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 2);
-        //curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-type: application/json'));
         $output = curl_exec($ch);
         curl_close($ch);
 
