@@ -25,37 +25,37 @@
 
 /* Get the default properties. These are stored in a separate file to ease up adding them to the snippets. */
 $extraPath = $modx->getOption('socialsuite.core_path', null, $modx->getOption('core_path') . 'components/socialsuite/');
-$defaults = include $extraPath . 'elements/snippets/properties/getFacebookProfile.properties.php';
+$defaults = include $extraPath . 'elements/snippets/properties/getTwitterProfile.properties.php';
 $scriptProperties = array_merge($defaults, $scriptProperties);
 
 /* @var SocialSuite $socialsuite */
 $socialsuite = $modx->getService('socialsuite','SocialSuite', $extraPath . 'model/');
-if (!$socialsuite) return '[getFacebookProfile] Error instantiating SocialSuite class.';
+if (!$socialsuite) return '[getTwitterProfile] Error instantiating SocialSuite class.';
 
-if (empty($scriptProperties['user'])) return '[getFacebookProfile] Error: no user defined.';
+if (empty($scriptProperties['user'])) return '[getTwitterProfile] Error: no user defined.';
 
 $data = array();
 $cached = false;
-$cacheKey = 'socialsuite/facebook/profiles/' . $scriptProperties['user'];
+$cacheKey = 'socialsuite/twitter/profiles/' . $scriptProperties['user'];
 $cache = intval($scriptProperties['cache']) && ($scriptProperties['cacheExpires'] > 0);
 if ($cache) {
     $data = $modx->cacheManager->get($cacheKey);
     if (!empty($data)) $cached = true;
 }
 
-/* If we can't retrieve it from cache, retrieve it from Facebook. */
+/* If we can't retrieve it from cache, retrieve it from Twitter. */
 if (!$cached) {
-    $url = 'https://graph.facebook.com/' . $scriptProperties['user'];
+    $url = 'https://twitter.com/users/show/' . $scriptProperties['user'] . '.json';
     $data = $socialsuite->simpleCurlRequest($url);
     if (!empty($data)) $data = $modx->fromJSON($data);
 }
 
-if (!$data || empty($data)) return '[getFacebookProfile] Sorry, something went wrong requesting the data.';
+if (!$data || empty($data)) return '[getTwitterProfile] Sorry, something went wrong requesting the data.';
 
 
 $output = '';
 if (intval($scriptProperties['showAvailableData'])) {
-    $output .= 'Showing all available data for Facebook user ' . $scriptProperties['user'] . ': <br />';
+    $output .= 'Showing all available data for Twitter user ' . $scriptProperties['user'] . ': <br />';
     foreach ($data as $key => $value) {
         if (is_array($value)) {
             foreach ($value as $secondKey => $secondValue) {
