@@ -25,7 +25,7 @@
 
 /* Get the default properties. These are stored in a separate file to ease up adding them to the snippets. */
 $extraPath = $modx->getOption('socialsuite.core_path', null, $modx->getOption('core_path') . 'components/socialsuite/');
-$defaults = include $extraPath . 'elements/snippets/properties/getFacebookUser.properties.php';
+$defaults = include $extraPath . 'elements/snippets/properties/getFacebookProfile.properties.php';
 $scriptProperties = array_merge($defaults, $scriptProperties);
 
 /* @var SocialSuite $socialsuite */
