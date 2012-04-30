@@ -37,7 +37,15 @@ $decimals = 0;
 $inputSuffix = '';
 $dec_point = '.';
 $thousands_sep = ',';
-if ($input < -10000000 || $input > 10000000) {
+if ($input < -10000000000 || $input > 10000000000) {
+    $input = $input / 1000000000;
+    $decimals = 0;
+    $inputSuffix = 'b';
+} elseif ($input < -1000000000 || $input > 1000000000) {
+    $input = $input / 1000000000;
+    $decimals = 1;
+    $inputSuffix = 'b';
+} elseif ($input < -10000000 || $input > 10000000) {
     $input = $input / 1000000;
     $decimals = 0;
     $inputSuffix = 'm';
