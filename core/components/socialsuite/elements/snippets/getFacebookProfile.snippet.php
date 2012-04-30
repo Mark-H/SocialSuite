@@ -54,19 +54,6 @@ if (!$data || empty($data)) return '[getFacebookProfile] Sorry, something went w
 
 
 $output = '';
-if (intval($scriptProperties['showAvailableData'])) {
-    $output .= 'Showing all available data for Facebook user ' . $scriptProperties['user'] . ': <br />';
-    foreach ($data as $key => $value) {
-        if (is_array($value)) {
-            foreach ($value as $secondKey => $secondValue) {
-                $output .= '<strong>' . $key . '.' . $secondKey . '</strong> = ' . $secondValue . '<br />';
-            }
-        } else {
-            $output .= '<strong>' . $key . '</strong> = ' . $value . '<br />';
-        }
-        $output .= '';
-    }
-}
 
 if (intval($scriptProperties['toPlaceholders'])) {
     $prefix = $scriptProperties['toPlaceholdersPrefix'];
@@ -83,6 +70,20 @@ if (intval($scriptProperties['toPlaceholders'])) {
         if ($cached && $cache) {
             $cached = false;
         }
+    }
+}
+
+if (intval($scriptProperties['showAvailableData'])) {
+    $output .= 'Showing all available data for Facebook user ' . $scriptProperties['user'] . ': <br />';
+    foreach ($data as $key => $value) {
+        if (is_array($value)) {
+            foreach ($value as $secondKey => $secondValue) {
+                $output .= '<strong>' . $key . '.' . $secondKey . '</strong> = ' . $secondValue . '<br />';
+            }
+        } else {
+            $output .= '<strong>' . $key . '</strong> = ' . $value . '<br />';
+        }
+        $output .= '';
     }
 }
 
