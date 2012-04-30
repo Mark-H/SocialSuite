@@ -1,3 +1,8 @@
-++ SocialSuite 0.0.0-dev, Released: 00/00/2012
+++ SocialSuite 1.0.0-dev, Released: 30/04/2012
 ++++++++++++++++++++++++++++++++++++++++++++++
 
+First release, including:
+- getFacebookProfile
+- getGooglePlusOne
+- getTwitterProfile
+- prettyNumbers
