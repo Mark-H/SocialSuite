@@ -73,7 +73,7 @@ if (empty($albums) || (count($albums) < 1)) {
 
 /* If albums are INT, assume it's the ID and do nothing. Else try to get the albums' ID. */
 foreach ($albums as $key => $album) {
-    if (!is_int($album)) {
+    if (!is_numeric($album)) {
         if (isset($albumsData['albums'][urlencode(trim($album))])) {
             $albums[$key] = $albumsData['albums'][urlencode(trim($album))];
         } else {
