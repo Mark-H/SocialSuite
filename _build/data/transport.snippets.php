@@ -22,6 +22,7 @@
 */
 
 $snips = array(
+    'getFacebookPhotos' => 'Gets all photos and albums from photos, templateable of course.',
     'getFacebookProfile' => 'Retrieves public profile data from a Facebook user or page.',
     'getGooglePlusOne' => 'Gets the amount of +1\'s for a specific URL.',
     'getTwitterProfile' => 'Retrieves profile data from a Twitter account, along with the latest status update.',

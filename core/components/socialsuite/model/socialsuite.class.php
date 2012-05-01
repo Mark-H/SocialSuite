@@ -36,9 +36,9 @@ class SocialSuite {
     function __construct(modX &$modx,array $config = array()) {
         $this->modx =& $modx;
  
-        $basePath = $this->modx->getOption('extraname.core_path',$config,$this->modx->getOption('core_path').'components/extraname/');
-        $assetsUrl = $this->modx->getOption('extraname.assets_url',$config,$this->modx->getOption('assets_url').'components/extraname/');
-        $assetsPath = $this->modx->getOption('extraname.assets_path',$config,$this->modx->getOption('assets_path').'components/extraname/');
+        $basePath = $this->modx->getOption('socialsuite.core_path',$config,$this->modx->getOption('core_path').'components/socialsuite/');
+        $assetsUrl = $this->modx->getOption('socialsuite.assets_url',$config,$this->modx->getOption('assets_url').'components/socialsuite/');
+        $assetsPath = $this->modx->getOption('socialsuite.assets_path',$config,$this->modx->getOption('assets_path').'components/socialsuite/');
         $this->config = array_merge(array(
             'base_bath' => $basePath,
             'core_path' => $basePath,
@@ -52,8 +52,8 @@ class SocialSuite {
             'connector_url' => $assetsUrl.'connector.php',
         ),$config);
 
-        $this->modx->addPackage('extraname',$this->config['model_path']);
-        $this->modx->lexicon->load('extraname:default');
+        $this->modx->addPackage('socialsuite',$this->config['model_path']);
+        $this->modx->lexicon->load('socialsuite:default');
     }
 
     /**
@@ -140,10 +140,5 @@ class SocialSuite {
 
         return $output;
     }
-
-    private function requestUrl($url = '', array $params = array(), $method = 'get') {
-
-    }
 }
 
-?>

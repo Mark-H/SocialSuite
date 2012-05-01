@@ -36,7 +36,7 @@ if (empty($scriptProperties['user'])) return '[getTwitterProfile] Error: no user
 
 $data = array();
 $cached = false;
-$cacheKey = 'socialsuite/twitter/profiles/' . $scriptProperties['user'];
+$cacheKey = "socialsuite/twitter/{$scriptProperties['user']}/profile";
 $cache = intval($scriptProperties['cache']) && ($scriptProperties['cacheExpires'] > 0);
 if ($cache) {
     $data = $modx->cacheManager->get($cacheKey);
@@ -45,7 +45,7 @@ if ($cache) {
 
 /* If we can't retrieve it from cache, retrieve it from Twitter. */
 if (!$cached) {
-    $url = 'https://twitter.com/users/show/' . $scriptProperties['user'] . '.json';
+    $url = "https://twitter.com/users/show/{$scriptProperties['user']}.json";
     $data = $socialsuite->simpleCurlRequest($url);
     if (!empty($data)) $data = $modx->fromJSON($data);
 }

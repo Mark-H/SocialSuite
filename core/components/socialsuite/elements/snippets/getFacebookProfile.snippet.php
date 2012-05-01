@@ -36,7 +36,7 @@ if (empty($scriptProperties['user'])) return '[getFacebookProfile] Error: no use
 
 $data = array();
 $cached = false;
-$cacheKey = 'socialsuite/facebook/profiles/' . $scriptProperties['user'];
+$cacheKey = "socialsuite/facebook/{$scriptProperties['user']}/profile";
 $cache = intval($scriptProperties['cache']) && ($scriptProperties['cacheExpires'] > 0);
 if ($cache) {
     $data = $modx->cacheManager->get($cacheKey);
@@ -45,7 +45,7 @@ if ($cache) {
 
 /* If we can't retrieve it from cache, retrieve it from Facebook. */
 if (!$cached) {
-    $url = 'https://graph.facebook.com/' . $scriptProperties['user'];
+    $url = "https://graph.facebook.com/{$scriptProperties['user']}";
     $data = $socialsuite->simpleCurlRequest($url);
     if (!empty($data)) $data = $modx->fromJSON($data);
 }
