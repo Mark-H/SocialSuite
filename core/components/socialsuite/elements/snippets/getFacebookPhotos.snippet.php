@@ -86,6 +86,7 @@ if (empty($albums) || (count($albums) < 1)) return '[getFacebookPhotos] No album
 
 /* Create a map with all album info and their photo info. */
 $returnMap = array();
+$allPhotos = array();
 foreach ($albums as $album) {
     $individualAlbumCacheKey = "socialsuite/facebook/{$scriptProperties['user']}/albums/{$album}";
     $individualAlbumData = $modx->cacheManager->get($individualAlbumCacheKey);
@@ -104,12 +105,16 @@ foreach ($albums as $album) {
              */
             $cacheTime = $scriptProperties['cacheExpiresPhotos'] + rand(-$scriptProperties['cacheExpiresPhotosVariation'], $scriptProperties['cacheExpiresPhotosVariation']);
             $modx->cacheManager->set($individualAlbumCacheKey, $rawdata['data'], $cacheTime);
+            $individualAlbumData = $rawdata['data'];
         }
     }
-    $returnMap[$album] = array(
-        'photos' => $individualAlbumData,
-        'meta' => $albumsData[$album],
-    );
+    if (is_array($individualAlbumData)) {
+        $returnMap[$album] = array(
+            'photos' => $individualAlbumData,
+            'meta' => $albumsData[$album],
+        );
+        $allPhotos = array_merge($allPhotos, $individualAlbumData);
+    }
 }
 
 $outputCacheKey = "socialsuite/_processed/facebook/photos/".md5(serialize($scriptProperties));
@@ -121,10 +126,40 @@ if ($fullyCached && intval($scriptProperties['cacheOutput'])) {
 }
 
 $output = array();
-foreach ($returnMap as $albumId => $albumData) {
-    $ta = $albumData['meta'];
-    $ta['photos'] = array();
-    foreach ($albumData['photos'] as $photo) {
+if (intval($scriptProperties['perAlbum'])) {
+    foreach ($returnMap as $albumId => $albumData) {
+        $ta = $albumData['meta'];
+        $ta['photos'] = array();
+        foreach ($albumData['photos'] as $photo) {
+            $tpa = array_merge($photo,array(
+                'image_source' => $photo['source'],
+                'image_thumb' => $photo['picture'],
+                'original_height' => $photo['height'],
+                'original_width' => $photo['width'],
+                'link' => $photo['link'],
+                'created' => strtotime($photo['created_time']),
+                'updated' => strtotime($photo['updated_time']),
+            ));
+            $ta['photos'][] = $socialsuite->getChunk($scriptProperties['photoTpl'], $tpa);
+        }
+        $ta['photos'] = implode($scriptProperties['photoSeparator'], $ta['photos']);
+        $output[] = $socialsuite->getChunk($scriptProperties['albumTpl'], $ta);
+    }
+    $output = implode($scriptProperties['albumSeparator'], $output);
+} else {
+    $i = 0;
+    /* Pagination */
+    $offset = $scriptProperties['offset'];
+    $limit = $scriptProperties['limit'];
+    $total = count($allPhotos);
+    $totalVar = $modx->getOption('totalVar', $scriptProperties, 'total');
+    $modx->setPlaceholder($totalVar,$total);
+
+    /* Get only the required photos */
+    $allPhotos = array_slice($allPhotos, $offset, $limit);
+    $ta = array();
+    /* Loop! */
+    foreach ($allPhotos as $photo) {
         $tpa = array_merge($photo,array(
             'image_source' => $photo['source'],
             'image_thumb' => $photo['picture'],
@@ -134,12 +169,12 @@ foreach ($returnMap as $albumId => $albumData) {
             'created' => strtotime($photo['created_time']),
             'updated' => strtotime($photo['updated_time']),
         ));
-        $ta['photos'][] = $socialsuite->getChunk($scriptProperties['photoTpl'], $tpa);
+        $ta[] = $socialsuite->getChunk($scriptProperties['photoTpl'], $tpa);
     }
-    $ta['photos'] = implode($scriptProperties['photoSeparator'], $ta['photos']);
-    $output[] = $socialsuite->getChunk($scriptProperties['albumTpl'], $ta);
+    $ta = implode($scriptProperties['photoSeparator'], $ta);
+    $output = $socialsuite->getChunk($scriptProperties['outerTpl'], array('photos' => $ta));
 }
-$output = implode($scriptProperties['albumSeparator'], $output);
+
 if (intval($scriptProperties['cacheOutput'])) {
     $modx->cacheManager->set($outputCacheKey, $output, 0);
 }
