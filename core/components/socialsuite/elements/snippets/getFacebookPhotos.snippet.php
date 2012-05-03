@@ -149,8 +149,8 @@ if (intval($scriptProperties['perAlbum'])) {
 } else {
     $i = 0;
     /* Pagination */
-    $offset = $scriptProperties['offset'];
-    $limit = $scriptProperties['limit'];
+    $offset = (int)$scriptProperties['offset'];
+    $limit = (int)$scriptProperties['limit'];
     $total = count($allPhotos);
     $totalVar = $modx->getOption('totalVar', $scriptProperties, 'total');
     $modx->setPlaceholder($totalVar,$total);
