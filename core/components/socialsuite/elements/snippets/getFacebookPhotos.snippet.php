@@ -40,7 +40,7 @@ if (empty($scriptProperties['user'])) return '[getFacebookPhotos] Error: no user
 $fullyCached = true;
 
 /* Get information on the albums. Either from cache, or from Facebook */
-$albumsCacheKey = 'socialsuite/facebook/' . $scriptProperties['user'] . '/albums';
+$albumsCacheKey = 'facebook/' . strtolower($scriptProperties['user']) . '/albums';
 $albumsData = $modx->cacheManager->get($albumsCacheKey, $socialsuite->cacheOptions);
 
 if (!$albumsData || empty($albumsData)) {
@@ -88,7 +88,8 @@ if (empty($albums) || (count($albums) < 1)) return '[getFacebookPhotos] No album
 $returnMap = array();
 $allPhotos = array();
 foreach ($albums as $album) {
-    $individualAlbumCacheKey = "socialsuite/facebook/{$scriptProperties['user']}/albums/{$album}";
+    $user = strtolower($scriptProperties['user']);
+    $individualAlbumCacheKey = "facebook/{$user}/albums/{$album}";
     $individualAlbumData = $modx->cacheManager->get($individualAlbumCacheKey, $socialsuite->cacheOptions);
     if (!$individualAlbumData || !is_array($individualAlbumData)) {
         /* Cache does not exist. Let's fetch the info from Facebook! */
@@ -117,7 +118,7 @@ foreach ($albums as $album) {
     }
 }
 
-$outputCacheKey = "socialsuite/_processed/facebook/photos/".md5(serialize($scriptProperties));
+$outputCacheKey = "_processed/facebook/photos/".md5(serialize($scriptProperties));
 if ($fullyCached && intval($scriptProperties['cacheOutput'])) {
     $output = $modx->cacheManager->get($outputCacheKey, $socialsuite->cacheOptions);
     if (!empty($output)) {

@@ -36,7 +36,7 @@ if (empty($scriptProperties['url'])) return '[getGooglePlusOne] Error: no url de
 
 $data = array();
 $cached = false;
-$cacheKey = 'socialsuite/google/plusone/' . md5($scriptProperties['url']);
+$cacheKey = 'google/plusone/' . md5(strtolower($scriptProperties['url']));
 $cache = intval($scriptProperties['cache']) && ($scriptProperties['cacheExpires'] > 0);
 if ($cache) {
     $data = $modx->cacheManager->get($cacheKey, $socialsuite->cacheOptions);
