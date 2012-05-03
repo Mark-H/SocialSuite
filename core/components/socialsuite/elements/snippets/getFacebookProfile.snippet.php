@@ -39,7 +39,7 @@ $cached = false;
 $cacheKey = "socialsuite/facebook/{$scriptProperties['user']}/profile";
 $cache = intval($scriptProperties['cache']) && ($scriptProperties['cacheExpires'] > 0);
 if ($cache) {
-    $data = $modx->cacheManager->get($cacheKey);
+    $data = $modx->cacheManager->get($cacheKey, $socialsuite->cacheOptions);
     if (!empty($data)) $cached = true;
 }
 
@@ -88,7 +88,7 @@ if (intval($scriptProperties['showAvailableData'])) {
 }
 
 if (!$cached && $cache) {
-    $modx->cacheManager->set($cacheKey, $data, $scriptProperties['cacheExpires']);
+    $modx->cacheManager->set($cacheKey, $data, $scriptProperties['cacheExpires'], $socialsuite->cacheOptions);
 }
 
 return $output;

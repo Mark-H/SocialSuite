@@ -39,7 +39,7 @@ $cached = false;
 $cacheKey = 'socialsuite/google/plusone/' . md5($scriptProperties['url']);
 $cache = intval($scriptProperties['cache']) && ($scriptProperties['cacheExpires'] > 0);
 if ($cache) {
-    $data = $modx->cacheManager->get($cacheKey);
+    $data = $modx->cacheManager->get($cacheKey, $socialsuite->cacheOptions);
     if (!empty($data)) $cached = true;
 }
 
@@ -64,7 +64,7 @@ if (isset($data['error'])) {
 $output = (int)$data[0]['result']['metadata']['globalCounts']['count'];
 
 if (!$cached && $cache) {
-    $modx->cacheManager->set($cacheKey, $data, $scriptProperties['cacheExpires']);
+    $modx->cacheManager->set($cacheKey, $data, $scriptProperties['cacheExpires'], $socialsuite->cacheOptions);
 }
 
 return $output;

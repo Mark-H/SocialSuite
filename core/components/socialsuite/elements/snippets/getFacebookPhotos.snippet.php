@@ -41,7 +41,7 @@ $fullyCached = true;
 
 /* Get information on the albums. Either from cache, or from Facebook */
 $albumsCacheKey = 'socialsuite/facebook/' . $scriptProperties['user'] . '/albums';
-$albumsData = $modx->cacheManager->get($albumsCacheKey);
+$albumsData = $modx->cacheManager->get($albumsCacheKey, $socialsuite->cacheOptions);
 
 if (!$albumsData || empty($albumsData)) {
     $fullyCached = false;
@@ -58,7 +58,7 @@ if (!$albumsData || empty($albumsData)) {
                 $albumsData['albumids'][] = $ab['id'];
                 $albumsData[$ab['id']] = $ab;
             }
-            $modx->cacheManager->set($albumsCacheKey, $albumsData, $scriptProperties['cacheExpiresAlbums']);
+            $modx->cacheManager->set($albumsCacheKey, $albumsData, $scriptProperties['cacheExpiresAlbums'], $socialsuite->cacheOptions);
         }
     }
 }
@@ -89,7 +89,7 @@ $returnMap = array();
 $allPhotos = array();
 foreach ($albums as $album) {
     $individualAlbumCacheKey = "socialsuite/facebook/{$scriptProperties['user']}/albums/{$album}";
-    $individualAlbumData = $modx->cacheManager->get($individualAlbumCacheKey);
+    $individualAlbumData = $modx->cacheManager->get($individualAlbumCacheKey, $socialsuite->cacheOptions);
     if (!$individualAlbumData || !is_array($individualAlbumData)) {
         /* Cache does not exist. Let's fetch the info from Facebook! */
         $fullyCached = false;
@@ -119,7 +119,7 @@ foreach ($albums as $album) {
 
 $outputCacheKey = "socialsuite/_processed/facebook/photos/".md5(serialize($scriptProperties));
 if ($fullyCached && intval($scriptProperties['cacheOutput'])) {
-    $output = $modx->cacheManager->get($outputCacheKey);
+    $output = $modx->cacheManager->get($outputCacheKey, $socialsuite->cacheOptions);
     if (!empty($output)) {
         return $output;
     }
@@ -176,7 +176,7 @@ if (intval($scriptProperties['perAlbum'])) {
 }
 
 if (intval($scriptProperties['cacheOutput'])) {
-    $modx->cacheManager->set($outputCacheKey, $output, 0);
+    $modx->cacheManager->set($outputCacheKey, $output, 0, $socialsuite->cacheOptions);
 }
 
 return $output;

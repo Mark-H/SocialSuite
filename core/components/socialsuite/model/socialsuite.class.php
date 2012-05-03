@@ -25,6 +25,7 @@ class SocialSuite {
     public $modx;
     public $config = array();
     private $chunks = array();
+    public $cacheOptions = array(xPDO::OPT_CACHE_KEY => 'socialsuite');
 
     /**
      * Main SocialSuite constructor for setting up configuration etc.
