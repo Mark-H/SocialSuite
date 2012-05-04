@@ -105,7 +105,7 @@ foreach ($albums as $album) {
              * nasty stuff.
              */
             $cacheTime = $scriptProperties['cacheExpiresPhotos'] + rand(-$scriptProperties['cacheExpiresPhotosVariation'], $scriptProperties['cacheExpiresPhotosVariation']);
-            $modx->cacheManager->set($individualAlbumCacheKey, $rawdata['data'], $cacheTime);
+            $modx->cacheManager->set($individualAlbumCacheKey, $rawdata['data'], $cacheTime, $socialsuite->cacheOptions);
             $individualAlbumData = $rawdata['data'];
         }
     }
