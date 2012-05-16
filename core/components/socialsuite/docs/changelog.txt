@@ -1,6 +1,7 @@
-++ SocialSuite 1.0.0-dev, Released: 30/04/2012
+++ SocialSuite 1.0.0-dev, Released: 16/05/2012
 ++++++++++++++++++++++++++++++++++++++++++++++
 
+Includes the first version of the following snippets:
 - getFacebookShares
 - getFacebookPhotos
 - getFacebookProfile

@@ -24,8 +24,10 @@
 $snips = array(
     'getFacebookPhotos' => 'Gets all photos and albums from photos, templateable of course.',
     'getFacebookProfile' => 'Retrieves public profile data from a Facebook user or page.',
-    'getGooglePlusOne' => 'Gets the amount of +1\'s for a specific URL.',
+    'getFacebookShares' => 'Gets the amount of shares/likes for a specific URL on Facebook.',
+    'getGooglePlusShares' => 'Gets the amount of +1\'s for a specific URL. Uses an unofficial API.',
     'getTwitterProfile' => 'Retrieves profile data from a Twitter account, along with the latest status update.',
+    'getTwitterShares' => 'Gets the amount of times a certain URL was tweeted. Uses an unofficial API.',
     'prettyNumbers' => 'Output filter to transform numbers to K, M or B-rounded values.'
 );
 
