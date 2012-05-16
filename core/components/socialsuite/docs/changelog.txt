@@ -6,4 +6,5 @@
 - getFacebookProfile
 - getGooglePlusOne
 - getTwitterProfile
+- getTwitterShares
 - prettyNumbers (Output Modifier)
