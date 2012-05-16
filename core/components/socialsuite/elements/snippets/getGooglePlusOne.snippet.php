@@ -54,7 +54,10 @@ if (!$cached) {
     if (!empty($data)) $data = $modx->fromJSON($data);
 }
 
-if (!$data || empty($data)) return '[getGooglePlusOne] Sorry, something went wrong requesting the data.';
+if (!$data || empty($data)) {
+    $modx->log(modX::LOG_LEVEL_ERROR, '[getGooglePlusOne] Sorry, something went wrong requesting the data.');
+    return 0;
+}
 
 if (isset($data['error'])) {
     $modx->log(modX::LOG_LEVEL_ERROR, '[getGooglePlusOne] An error occured fetching Google +1 count: '.$data['error']['message']);
