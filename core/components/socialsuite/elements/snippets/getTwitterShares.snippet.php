@@ -32,7 +32,7 @@ $scriptProperties = array_merge($defaults, $scriptProperties);
 $socialsuite = $modx->getService('socialsuite','SocialSuite', $extraPath . 'model/');
 if (!$socialsuite) return '[getTwitterShares] Error instantiating SocialSuite class.';
 
-if (empty($scriptProperties['url'])) return '[getTwitterShares] Error: no url defined.';
+if (empty($scriptProperties['url'])) $scriptProperties['url'] = $modx->makeUrl($modx->resource->id, '', '', 'full');
 
 $data = array();
 $cached = false;
