@@ -1,11 +1,9 @@
-- Cache to custom partition to prevent everything being cleared by resource cache.
-- Added getFacebookPhotos snippet.
-
 ++ SocialSuite 1.0.0-dev, Released: 30/04/2012
 ++++++++++++++++++++++++++++++++++++++++++++++
 
-First release, including:
+- getFacebookLikes
+- getFacebookPhotos
 - getFacebookProfile
 - getGooglePlusOne
 - getTwitterProfile
-- prettyNumbers
+- prettyNumbers (Output Modifier)

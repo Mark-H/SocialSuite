@@ -30,7 +30,8 @@ foreach ($opts as $opt) {
     $ta = explode('=',$opt);
     $options[$ta[0]] = $ta[1];
 }
-if (!isset($input) || empty($input) || !is_numeric($input)) return '0';
+if (!isset($input) || empty($input)) return '0';
+if (!is_numeric($input)) return $input;
 
 $input = (float)$input;
 $decimals = 0;
