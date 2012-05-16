@@ -1,10 +1,10 @@
 ++ SocialSuite 1.0.0-dev, Released: 30/04/2012
 ++++++++++++++++++++++++++++++++++++++++++++++
 
-- getFacebookLikes
+- getFacebookShares
 - getFacebookPhotos
 - getFacebookProfile
-- getGooglePlusOne
+- getGooglePlusShares
 - getTwitterProfile
 - getTwitterShares
 - prettyNumbers (Output Modifier)

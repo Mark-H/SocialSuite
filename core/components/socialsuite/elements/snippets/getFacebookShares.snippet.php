@@ -1,6 +1,6 @@
 <?php
 /**
- * SocialSuite - getFacebookLikes
+ * SocialSuite - getFacebookShares
  *
  * Copyright 2011 by Mark Hamstra <hello@markhamstra.com>
  *
@@ -25,18 +25,18 @@
 
 /* Get the default properties. These are stored in a separate file to ease up adding them to the snippets. */
 $extraPath = $modx->getOption('socialsuite.core_path', null, $modx->getOption('core_path') . 'components/socialsuite/');
-$defaults = include $extraPath . 'elements/snippets/properties/getFacebookLikes.properties.php';
+$defaults = include $extraPath . 'elements/snippets/properties/getFacebookShares.properties.php';
 $scriptProperties = array_merge($defaults, $scriptProperties);
 
 /* @var SocialSuite $socialsuite */
 $socialsuite = $modx->getService('socialsuite','SocialSuite', $extraPath . 'model/');
-if (!$socialsuite) return '[getFacebookLikes] Error instantiating SocialSuite class.';
+if (!$socialsuite) return '[getFacebookShares] Error instantiating SocialSuite class.';
 
-if (empty($scriptProperties['url'])) return '[getFacebookLikes] Error: no url defined.';
+if (empty($scriptProperties['url'])) return '[getFacebookShares] Error: no url defined.';
 
 $data = array();
 $cached = false;
-$cacheKey = 'facebook/likes/' . md5(strtolower($scriptProperties['url']));
+$cacheKey = 'facebook/_shares/' . md5(strtolower($scriptProperties['url']));
 $cache = intval($scriptProperties['cache']) && ($scriptProperties['cacheExpires'] > 0);
 if ($cache) {
     $data = $modx->cacheManager->get($cacheKey, $socialsuite->cacheOptions);
@@ -52,12 +52,12 @@ if (!$cached) {
 }
 
 if (!$data || empty($data)) {
-    $modx->log(modX::LOG_LEVEL_ERROR, '[getFacebookLikes] Empty result set requesting data for ' . $scriptProperties['url']);
+    $modx->log(modX::LOG_LEVEL_ERROR, '[getFacebookShares] Empty result set requesting data for ' . $scriptProperties['url']);
     return 0;
 }
 
 if (isset($data['error'])) {
-    $modx->log(modX::LOG_LEVEL_ERROR, '[getFacebookLikes] An error occured fetching Facebook Likes count: '.$data['error']['message']);
+    $modx->log(modX::LOG_LEVEL_ERROR, '[getFacebookShares] An error occured fetching Facebook Likes count: '.$data['error']['message']);
     return 0;
 }
 

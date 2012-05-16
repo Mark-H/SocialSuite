@@ -1,6 +1,6 @@
 <?php
 /**
- * SocialSuite - getGooglePlusOne
+ * SocialSuite - getGooglePlusShares
  *
  * Copyright 2011 by Mark Hamstra <hello@markhamstra.com>
  *
@@ -25,18 +25,18 @@
 
 /* Get the default properties. These are stored in a separate file to ease up adding them to the snippets. */
 $extraPath = $modx->getOption('socialsuite.core_path', null, $modx->getOption('core_path') . 'components/socialsuite/');
-$defaults = include $extraPath . 'elements/snippets/properties/getGooglePlusOne.properties.php';
+$defaults = include $extraPath . 'elements/snippets/properties/getGooglePlusShares.properties.php';
 $scriptProperties = array_merge($defaults, $scriptProperties);
 
 /* @var SocialSuite $socialsuite */
 $socialsuite = $modx->getService('socialsuite','SocialSuite', $extraPath . 'model/');
-if (!$socialsuite) return '[getGooglePlusOne] Error instantiating SocialSuite class.';
+if (!$socialsuite) return '[getGooglePlusShares] Error instantiating SocialSuite class.';
 
-if (empty($scriptProperties['url'])) return '[getGooglePlusOne] Error: no url defined.';
+if (empty($scriptProperties['url'])) return '[getGooglePlusShares] Error: no url defined.';
 
 $data = array();
 $cached = false;
-$cacheKey = 'google/plusone/' . md5(strtolower($scriptProperties['url']));
+$cacheKey = 'googleplus/_shares/' . md5(strtolower($scriptProperties['url']));
 $cache = intval($scriptProperties['cache']) && ($scriptProperties['cacheExpires'] > 0);
 if ($cache) {
     $data = $modx->cacheManager->get($cacheKey, $socialsuite->cacheOptions);
@@ -55,12 +55,12 @@ if (!$cached) {
 }
 
 if (!$data || empty($data)) {
-    $modx->log(modX::LOG_LEVEL_ERROR, '[getGooglePlusOne] Sorry, something went wrong requesting the data.');
+    $modx->log(modX::LOG_LEVEL_ERROR, '[getGooglePlusShares] Sorry, something went wrong requesting the data.');
     return 0;
 }
 
-if (isset($data['error'])) {
-    $modx->log(modX::LOG_LEVEL_ERROR, '[getGooglePlusOne] An error occured fetching Google +1 count: '.$data['error']['message']);
+if (isset($data[0]['error'])) {
+    $modx->log(modX::LOG_LEVEL_ERROR, '[getGooglePlusShares] An error occured fetching Google +1 count: '.$data[0]['error']['message']);
     return 0;
 }
 
