@@ -14,9 +14,9 @@ return array(
     'limit' => 20,
 
 
-    'cacheOutput' => false,
-    'cacheExpiresAlbums' => 14400,
-    'cacheExpiresPhotos' => 28800,
+    'cacheOutput' => true,
+    'cacheExpires' => 172800, // Default to 2 days
+    'cacheExpiresPhotos' => 345600, // Default to 4 days, even though it'll be refreshed when we refresh the albums
     'cacheExpiresPhotosVariation' => 3600,
 
     'showAvailableData' => false,

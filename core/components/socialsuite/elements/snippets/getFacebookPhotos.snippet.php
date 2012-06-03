@@ -32,94 +32,166 @@ $scriptProperties = array_merge($defaults, $scriptProperties);
 $socialsuite = $modx->getService('socialsuite','SocialSuite', $extraPath . 'model/');
 if (!$socialsuite) return '[getFacebookPhotos] Error instantiating SocialSuite class.';
 
-if (empty($scriptProperties['user'])) return '[getFacebookPhotos] Error: no user defined.';
+/* We'll need the FQL class */
+require_once $extraPath . 'model/fql/fql.class.php';
 
 /* This flag indicates if we can fetch the output from cache.
  * When we retrieve possibly new information via facebook this is set to FALSE.
  */
-$fullyCached = true;
+$refreshProcessedCache = false;
+
+/* Find and cache user info */
+if (empty($scriptProperties['user'])) return '[getFacebookPhotos] Error: no user defined.';
+$user = (is_int($scriptProperties['user'])) ? (int)$scriptProperties['user'] : false;
+if (!$user) {
+    $userInfo = $modx->cacheManager->get('facebook/' . strtolower($scriptProperties['user']), $socialsuite->cacheOptions);
+    if (!$userInfo || !is_array($userInfo)) {
+        $refreshProcessedCache = true;
+        $url = "https://graph.facebook.com/{$scriptProperties['user']}";
+        $raw = $socialsuite->simpleCurlRequest($url);
+        $raw = $modx->fromJSON($raw);
+        if (is_array($raw) && !isset($raw['error']) && isset($raw['id'])) {
+            $userInfo = $raw;
+            $modx->cacheManager->set('facebook/' . strtolower($scriptProperties['user']), $userInfo, 0, $socialsuite->cacheOptions);
+        } else {
+            $modx->log(modX::LOG_LEVEL_ERROR, '[SocialSuite/getFacebookPhotos] Could not retrieve info about user ' . $scriptProperties['user'] . ' | Information: ' . print_r($raw, true));
+            return '[SocialSuite/getFacebookPhotos] Error retrieving information about the user.';
+        }
+    }
+
+    if (!$userInfo || !is_array($userInfo)) {
+        $modx->log(modX::LOG_LEVEL_ERROR, '[SocialSuite/getFacebookPhotos] No info avaiable for user ' . $scriptProperties['user']);
+        return '[SocialSuite/getFacebookPhotos] User information not found.';
+    }
+
+    $user = (isset($userInfo['id'])) ? $userInfo['id'] : null;
+}
+if (!$user) {
+    $modx->log(modX::LOG_LEVEL_ERROR, '[SocialSuite/getFacebookPhotos] No info avaiable for user ' . $scriptProperties['user']);
+    return '[SocialSuite/getFacebookPhotos] User information not found.';
+}
+
 
 /* Get information on the albums. Either from cache, or from Facebook */
-$albumsCacheKey = 'facebook/' . strtolower($scriptProperties['user']) . '/albums';
-$albumsData = $modx->cacheManager->get($albumsCacheKey, $socialsuite->cacheOptions);
+$albumsCacheKey = 'facebook/' . strtolower($user) . '/albums';
+$albums = $modx->cacheManager->get($albumsCacheKey, $socialsuite->cacheOptions);
+$albumPhotos = array();
 
-if (!$albumsData || empty($albumsData)) {
-    $fullyCached = false;
-    $albumsData = array();
-    $url = "https://graph.facebook.com/{$scriptProperties['user']}/albums";
-    $rawdata = $socialsuite->simpleCurlRequest($url);
-    if (!empty($rawdata)) {
-        $rawdata = $modx->fromJSON($rawdata);
-        if (is_array($rawdata) && !isset($rawdata['error']) && !empty($rawdata['data'])) {
-            $albumsData['albums'] = array();
-            $albumsData['albumids'] = array();
-            foreach ($rawdata['data'] as $ab) {
-                $albumsData['albums'][urlencode($ab['name'])] = $ab['id'];
-                $albumsData['albumids'][] = $ab['id'];
-                $albumsData[$ab['id']] = $ab;
+if (!$albums || empty($albums)) {
+    $refreshProcessedCache = true;
+
+    $fql = new FQL();
+    $fql->newQuery('album', array(), array('owner' => $user), 'albums');
+    $fql->newQuery('photo', array(), array('owner' => $user, 'aid:IN' => 'SELECT aid FROM #albums'), 'photos');
+    $query = $fql->getFQL();
+
+    $url = "https://graph.facebook.com/fql?q={$query}";
+    $raw = $socialsuite->simpleCurlRequest($url);
+    $raw = $modx->fromJSON($raw);
+    if (!empty($raw) && is_array($raw)) {
+        if (isset($raw['error'])) {
+            $modx->log(modX::LOG_LEVEL_ERROR,'[SocialSuite/getFacebookPhotos] Error requesting data from Facebook: ' . $raw['error']['message'] . ' for query '.$query);
+            return 'Error retrieving data.';
+        }
+
+        $data = $raw['data'];
+        $albums = array(
+            'nametoid' => array(),
+            'ids' => array(),
+        );
+        foreach ($data as $dataset) {
+            if ($dataset['name'] == 'albums') {
+                foreach ($dataset['fql_result_set'] as $album) {
+                    $aid = (string)$album['object_id'];
+                    $albums['nametoid'][urlencode($album['name'])] = $aid;
+                    $albums['albumids'][] = $aid;
+                    $albums['data'][$aid] = $album;
+                    $albumPhotos[$aid] = array();
+                }
             }
-            $modx->cacheManager->set($albumsCacheKey, $albumsData, $scriptProperties['cacheExpiresAlbums'], $socialsuite->cacheOptions);
+
+            if ($dataset['name'] == 'photos') {
+                foreach ($dataset['fql_result_set'] as $photo) {
+                    $aoid = (string)$photo['album_object_id'];
+                    if (!isset($albumPhotos[$aoid])) {
+                        $albumPhotos[$aoid] = array();
+                    }
+                    $albumPhotos[$aoid][$photo['position']] = $photo;
+                }
+            }
+        }
+
+        if (!empty($albums)) {
+            $modx->cacheManager->set("facebook/{$user}/albums", $albums, $scriptProperties['cacheExpires'], $socialsuite->cacheOptions);
+        }
+        if (!empty($albumPhotos)) {
+            foreach ($albumPhotos as $album => $photos) {
+                $albumKey = "facebook/{$user}/albums/{$album}";
+                $modx->cacheManager->set($albumKey, $photos, $scriptProperties['cacheExpiresPhotos'], $socialsuite->cacheOptions);
+            }
         }
     }
 }
-if (!$albumsData || empty($albumsData)) return '[getFacebookPhotos] Sorry, something went wrong retrieving album data.';
 
-$albums = $modx->getOption('albums', $scriptProperties, '');
-$albums = (!is_array($albums) && !empty($albums)) ? explode(',', trim($albums)) : $albums;
-if (empty($albums) || (count($albums) < 1)) {
+if (!$albums || empty($albums)) return 'Sorry, no data available.';
+
+$showAlbums = $modx->getOption('albums', $scriptProperties, '');
+$showAlbums = (!is_array($showAlbums) && !empty($showAlbums)) ? explode(',', trim($showAlbums)) : $showAlbums;
+if (empty($showAlbums) || (count($showAlbums) < 1)) {
     /* Default to all albums. */
-    $albums = $albumsData['albumids'];
+    $showAlbums = $albums['albumids'];
 }
 
 /* If albums are INT, assume it's the ID and do nothing. Else try to get the albums' ID. */
-foreach ($albums as $key => $album) {
+foreach ($showAlbums as $key => $album) {
     if (!is_numeric($album)) {
-        if (isset($albumsData['albums'][urlencode(trim($album))])) {
-            $albums[$key] = $albumsData['albums'][urlencode(trim($album))];
+        if (isset($albums['albums'][urlencode(trim($album))])) {
+            $showAlbums[$key] = $albums['nametoid'][urlencode(trim($album))];
         } else {
             $modx->log(modX::LOG_LEVEL_ERROR, '[getFacebookPhotos] Album ' . $album . ' is not a valid ID or album name.');
         }
     }
 }
 
-if (empty($albums) || (count($albums) < 1)) return '[getFacebookPhotos] No albums requested or valid.';
+if (empty($showAlbums) || (count($showAlbums) < 1)) return '[getFacebookPhotos] No albums requested or valid.';
 
 /* Create a map with all album info and their photo info. */
 $returnMap = array();
 $allPhotos = array();
-foreach ($albums as $album) {
-    $user = strtolower($scriptProperties['user']);
-    $individualAlbumCacheKey = "facebook/{$user}/albums/{$album}";
-    $individualAlbumData = $modx->cacheManager->get($individualAlbumCacheKey, $socialsuite->cacheOptions);
-    if (!$individualAlbumData || !is_array($individualAlbumData)) {
-        /* Cache does not exist. Let's fetch the info from Facebook! */
-        $fullyCached = false;
-        $ta =
-        $url = "https://graph.facebook.com/{$album}/photos";
-        $rawdata = $socialsuite->simpleCurlRequest($url);
-        $rawdata = $modx->fromJSON($rawdata);
-        if ($rawdata && is_array($rawdata) && !isset($rawdata['error'])) {
-            /* To prevent one request from fetching ALL photos, we throw in some random variation
-             * into the caching time. This means that the individual albums will be retrieved
-             * during different requests after the first load, to prevent time outs and other
-             * nasty stuff.
-             */
-            $cacheTime = $scriptProperties['cacheExpiresPhotos'] + rand(-$scriptProperties['cacheExpiresPhotosVariation'], $scriptProperties['cacheExpiresPhotosVariation']);
-            $modx->cacheManager->set($individualAlbumCacheKey, $rawdata['data'], $cacheTime, $socialsuite->cacheOptions);
-            $individualAlbumData = $rawdata['data'];
+foreach ($showAlbums as $album) {
+    if (isset($albumPhotos[$album])) {
+        $individualAlbumData = $albumPhotos[$album];
+    } else {
+        $individualAlbumCacheKey = "facebook/{$user}/albums/{$album}";
+        $individualAlbumData = $modx->cacheManager->get($individualAlbumCacheKey, $socialsuite->cacheOptions);
+        if (!$individualAlbumData || !is_array($individualAlbumData)) {
+            $refreshProcessedCache = true;
+
+            /* Cache does not exist. Let's fetch the info from Facebook! */
+            $fql = new FQL();
+            $fql->newQuery('photo',array(), array('owner' => $user, 'album_object_id' => $album));
+            $url = "https://graph.facebook.com/fql?q=" . urlencode($fql->getFQL());
+            $rawdata = $socialsuite->simpleCurlRequest($url);
+            $rawdata = $modx->fromJSON($rawdata);
+            echo $url;
+            if ($rawdata && is_array($rawdata) && !isset($rawdata['error'])) {
+                $cacheTime = $scriptProperties['cacheExpiresPhotos'] + rand(-$scriptProperties['cacheExpiresPhotosVariation'], $scriptProperties['cacheExpiresPhotosVariation']);
+                $modx->cacheManager->set($individualAlbumCacheKey, $rawdata['data'], $cacheTime, $socialsuite->cacheOptions);
+                $individualAlbumData = $rawdata['data'];
+            }
         }
     }
     if (is_array($individualAlbumData)) {
         $returnMap[$album] = array(
             'photos' => $individualAlbumData,
-            'meta' => $albumsData[$album],
+            'meta' => $albums['data'][$album],
         );
         $allPhotos = array_merge($allPhotos, $individualAlbumData);
     }
 }
 
 $outputCacheKey = "_processed/facebook/photos/".md5(serialize($scriptProperties));
-if ($fullyCached && intval($scriptProperties['cacheOutput'])) {
+if (!$refreshProcessedCache && intval($scriptProperties['cacheOutput'])) {
     $output = $modx->cacheManager->get($outputCacheKey, $socialsuite->cacheOptions);
     if (!empty($output)) {
         return $output;
@@ -133,13 +205,8 @@ if (intval($scriptProperties['perAlbum'])) {
         $ta['photos'] = array();
         foreach ($albumData['photos'] as $photo) {
             $tpa = array_merge($photo,array(
-                'image_source' => $photo['source'],
-                'image_thumb' => $photo['picture'],
-                'original_height' => $photo['height'],
-                'original_width' => $photo['width'],
-                'link' => $photo['link'],
-                'created' => strtotime($photo['created_time']),
-                'updated' => strtotime($photo['updated_time']),
+                'created' => strtotime($photo['created']),
+                'modified' => strtotime($photo['modified']),
             ));
             $ta['photos'][] = $socialsuite->getChunk($scriptProperties['photoTpl'], $tpa);
         }
@@ -162,13 +229,8 @@ if (intval($scriptProperties['perAlbum'])) {
     /* Loop! */
     foreach ($allPhotos as $photo) {
         $tpa = array_merge($photo,array(
-            'image_source' => $photo['source'],
-            'image_thumb' => $photo['picture'],
-            'original_height' => $photo['height'],
-            'original_width' => $photo['width'],
-            'link' => $photo['link'],
-            'created' => strtotime($photo['created_time']),
-            'updated' => strtotime($photo['updated_time']),
+            'created' => strtotime($photo['created']),
+            'modified' => strtotime($photo['modified']),
         ));
         $ta[] = $socialsuite->getChunk($scriptProperties['photoTpl'], $tpa);
     }
