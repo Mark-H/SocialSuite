@@ -3,5 +3,5 @@
 return array(
     'url' => '',
     'cache' => true,
-    'cacheExpires' => 7200,
+    'cacheExpires' => 3600,
 );
