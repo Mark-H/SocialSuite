@@ -54,7 +54,7 @@ if (defined('PX')) {
     define('PKG_NAME','SocialSuite');
     define('PKG_NAME_LOWER',strtolower(PKG_NAME));
     define('PKG_VERSION','1.0.0');
-    define('PKG_RELEASE','dev8');
+    define('PKG_RELEASE','dev10');
     $root = dirname(dirname(__FILE__)).'/';
     require_once $root . 'config.core.php';
     require_once MODX_CORE_PATH . 'model/modx/modx.class.php';

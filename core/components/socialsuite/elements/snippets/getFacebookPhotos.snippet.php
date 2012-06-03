@@ -145,7 +145,7 @@ if (empty($showAlbums) || (count($showAlbums) < 1)) {
 /* If albums are INT, assume it's the ID and do nothing. Else try to get the albums' ID. */
 foreach ($showAlbums as $key => $album) {
     if (!is_numeric($album)) {
-        if (isset($albums['albums'][urlencode(trim($album))])) {
+        if (isset($albums['nametoid'][urlencode(trim($album))])) {
             $showAlbums[$key] = $albums['nametoid'][urlencode(trim($album))];
         } else {
             $modx->log(modX::LOG_LEVEL_ERROR, '[getFacebookPhotos] Album ' . $album . ' is not a valid ID or album name.');
@@ -173,7 +173,6 @@ foreach ($showAlbums as $album) {
             $url = "https://graph.facebook.com/fql?q=" . urlencode($fql->getFQL());
             $rawdata = $socialsuite->simpleCurlRequest($url);
             $rawdata = $modx->fromJSON($rawdata);
-            echo $url;
             if ($rawdata && is_array($rawdata) && !isset($rawdata['error'])) {
                 $cacheTime = $scriptProperties['cacheExpiresPhotos'] + rand(-$scriptProperties['cacheExpiresPhotosVariation'], $scriptProperties['cacheExpiresPhotosVariation']);
                 $modx->cacheManager->set($individualAlbumCacheKey, $rawdata['data'], $cacheTime, $socialsuite->cacheOptions);
