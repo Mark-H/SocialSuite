@@ -83,10 +83,9 @@ if (!$albums || empty($albums)) {
     $fql = new FQL();
     $fql->newQuery('album', array(), array('owner' => $user), 'albums');
     $fql->newQuery('photo', array(), array('owner' => $user, 'aid:IN' => 'SELECT aid FROM #albums'), 'photos');
-    $query = $fql->getFQL();
+    $query = $fql->getRequestUrl();
 
-    $url = "https://graph.facebook.com/fql?q={$query}";
-    $raw = $socialsuite->simpleCurlRequest($url);
+    $raw = $socialsuite->simpleCurlRequest($query);
     $raw = $modx->fromJSON($raw);
     if (!empty($raw) && is_array($raw)) {
         if (isset($raw['error'])) {
@@ -170,7 +169,7 @@ foreach ($showAlbums as $album) {
             /* Cache does not exist. Let's fetch the info from Facebook! */
             $fql = new FQL();
             $fql->newQuery('photo',array(), array('owner' => $user, 'album_object_id' => $album));
-            $url = "https://graph.facebook.com/fql?q=" . urlencode($fql->getFQL());
+            $url = $fql->getRequestUrl();
             $rawdata = $socialsuite->simpleCurlRequest($url);
             $rawdata = $modx->fromJSON($rawdata);
             if ($rawdata && is_array($rawdata) && !isset($rawdata['error'])) {
