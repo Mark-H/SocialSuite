@@ -82,7 +82,9 @@ if (!$albums || empty($albums)) {
 
     $fql = new FQL();
     $fql->newQuery('album', array(), array('owner' => $user), 'albums');
+    $fql->setOrder('modified_major DESC');
     $fql->newQuery('photo', array(), array('owner' => $user, 'aid:IN' => 'SELECT aid FROM #albums'), 'photos');
+    $fql->setOrder('created DESC');
     $query = $fql->getRequestUrl();
 
     $raw = $socialsuite->simpleCurlRequest($query);

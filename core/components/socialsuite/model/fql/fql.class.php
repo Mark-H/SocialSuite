@@ -220,6 +220,11 @@ class FQL {
         $this->queries[$query]['fields'] = $fields;
     }
 
+    public function setOrder($field, $query = 0) {
+        $query = (empty($query)) ? $this->currentQuery : $query;
+        $this->queries[$query]['order'] = $field;
+    }
+
 
     public function getRequestUrl() {
         $query = array();
@@ -230,6 +235,7 @@ class FQL {
             $query[$name] = 'SELECT ' . implode(', ',$q['fields']);
             $query[$name] .= ' FROM ' . $q['from'];
             $query[$name] .= ' WHERE ' . $this->formatConditions($q['conditions']);
+            if (isset($q['order'])) $query[$name] .= ' ORDER BY ' . $q['order'];
         }
 
         if (count($query) < 2) {
