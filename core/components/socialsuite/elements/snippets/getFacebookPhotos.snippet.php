@@ -117,7 +117,7 @@ if (!$albums || empty($albums)) {
                     if (!isset($albumPhotos[$aoid])) {
                         $albumPhotos[$aoid] = array();
                     }
-                    $albumPhotos[$aoid][$photo['position']] = $photo;
+                    $albumPhotos[$aoid][] = $photo;
                 }
             }
         }
