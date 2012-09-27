@@ -128,7 +128,8 @@ if (!$albums || empty($albums)) {
         if (!empty($albumPhotos)) {
             foreach ($albumPhotos as $album => $photos) {
                 $albumKey = "facebook/{$user}/albums/{$album}";
-                $modx->cacheManager->set($albumKey, $photos, $scriptProperties['cacheExpiresPhotos'], $socialsuite->cacheOptions);
+                $cacheTime = $scriptProperties['cacheExpiresPhotos'] + rand(-$scriptProperties['cacheExpiresPhotosVariation'], $scriptProperties['cacheExpiresPhotosVariation']);
+                $modx->cacheManager->set($albumKey, $photos, $cacheTime, $socialsuite->cacheOptions);
             }
         }
     }

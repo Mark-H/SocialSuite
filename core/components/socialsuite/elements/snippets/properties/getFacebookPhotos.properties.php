@@ -13,15 +13,8 @@ return array(
     'offset' => 0,
     'limit' => 20,
 
-
     'cacheOutput' => false,
     'cacheExpires' => 172800, // Default to 2 days
     'cacheExpiresPhotos' => 345600, // Default to 4 days, even though it'll be refreshed when we refresh the albums
     'cacheExpiresPhotosVariation' => 3600,
-
-    'showAvailableData' => false,
-    'toPlaceholders' => false,
-    'toPlaceholdersPrefix' => 'fb',
-
-    'tpl' => ''
 );
