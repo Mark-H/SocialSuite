@@ -36,7 +36,7 @@ if (empty($scriptProperties['url'])) $scriptProperties['url'] = $modx->makeUrl($
 
 $data = array();
 $cached = false;
-$cacheKey = 'twitter/_shares/' . md5(strtolower($scriptProperties['url']));
+$cacheKey = 'twitter/_shares/101/' . md5(strtolower($scriptProperties['url']));
 $cache = intval($scriptProperties['cache']) && ($scriptProperties['cacheExpires'] > 0);
 if ($cache) {
     $data = $modx->cacheManager->get($cacheKey, $socialsuite->cacheOptions);
@@ -45,7 +45,7 @@ if ($cache) {
 
 /* If we can't retrieve it from cache, retrieve it from the unofficial +1 API. */
 if (!$cached) {
-    $url = 'http://urls.api.twitter.com/1/urls/count.json?url=' . urlencode($scriptProperties['url']);
+    $url = 'http://urls.api.twitter.com/1/urls/count.json?url=' . $scriptProperties['url'];
     $data = $socialsuite->simpleCurlRequest($url);
 
     if (!empty($data)) $data = $modx->fromJSON($data);
