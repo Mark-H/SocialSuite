@@ -15,7 +15,7 @@ class FQL {
             'owner' => array('indexable' => true, 'type' => 'int'),
             'cover_pid' => array('type' => 'string'),
             'cover_object_id' => array('type' => 'int'),
-            'name' => array('type' => 'time'),
+            'name' => array('type' => 'string'),
             'created' => array('type' => 'time'),
             'modified' => array('type' => 'time'),
             'description' => array('type' => 'string'),
