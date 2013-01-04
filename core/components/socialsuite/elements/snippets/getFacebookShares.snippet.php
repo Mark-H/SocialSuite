@@ -43,12 +43,29 @@ if ($cache) {
     if (!empty($data)) $cached = true;
 }
 
-/* If we can't retrieve it from cache, retrieve it from the unofficial +1 API. */
-if (!$cached) {
-    $url = 'https://graph.facebook.com/' . urlencode($scriptProperties['url']);
-    $data = $socialsuite->simpleCurlRequest($url);
+/* If we can't retrieve it from cache, retrieve it from FQL. */
+if (true || !$cached) {
+    /* We'll need the FQL class */
+    require_once $extraPath . 'model/fql/fql.class.php';
 
+    /* Build the FQL Query */
+    $fql = new FQL();
+    $fql->newQuery(
+        'link_stat',
+        array('url','normalized_url','share_count','like_count',
+            'comment_count','total_count','commentsbox_count','comments_fbid','click_count'),
+        array(
+            'url' => "'".$scriptProperties['url']."'",
+        )
+    );
+    $query = $fql->getRequestUrl();
+    $data = $socialsuite->simpleCurlRequest($query);
     if (!empty($data)) $data = $modx->fromJSON($data);
+
+    /* Get the actual data from the result */
+    if (!empty($data['data'])) {
+        $data = reset($data['data']);
+    }
 }
 
 if (!$data || empty($data)) {
@@ -65,5 +82,10 @@ if (!$cached && $cache) {
     $modx->cacheManager->set($cacheKey, $data, $scriptProperties['cacheExpires'], $socialsuite->cacheOptions);
 }
 
-if (isset($data[$scriptProperties['node']])) return (string)$data[$scriptProperties['node']];
-return 0;
+if (isset($data[$scriptProperties['node']])) {
+    return (string)$data[$scriptProperties['node']];
+}
+else {
+    $modx->log(modX::LOG_LEVEL_ERROR,'[getFacebookShares] The chosen &node "'.$scriptProperties['node'].'" does not exist in the result.');
+    return 0;
+}

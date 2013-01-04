@@ -36,7 +36,7 @@ if (empty($scriptProperties['url'])) $scriptProperties['url'] = $modx->makeUrl($
 
 $data = array();
 $cached = false;
-$cacheKey = 'twitter/_shares/101/' . md5(strtolower($scriptProperties['url']));
+$cacheKey = 'twitter/_shares/' . md5(strtolower($scriptProperties['url']));
 $cache = intval($scriptProperties['cache']) && ($scriptProperties['cacheExpires'] > 0);
 if ($cache) {
     $data = $modx->cacheManager->get($cacheKey, $socialsuite->cacheOptions);

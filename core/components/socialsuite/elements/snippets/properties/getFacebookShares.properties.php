@@ -4,5 +4,5 @@ return array(
     'url' => '',
     'cache' => true,
     'cacheExpires' => 3600,
-    'node' => 'shares',
+    'node' => 'total_count',
 );
